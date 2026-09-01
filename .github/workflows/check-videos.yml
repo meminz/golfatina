@@ -1,0 +1,52 @@
+name: Check channels for new golf videos
+
+on:
+  schedule:
+    # 06:00 UTC daily -- adjust to taste
+    - cron: "0 13 16 18 *"
+  workflow_dispatch: {}  # lets you trigger it manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies (ffmpeg, tesseract)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tesseract-ocr
+
+      - name: Install yt-dlp + Python dependencies
+        run: |
+          pip install --upgrade yt-dlp
+          pip install -r requirements.txt
+
+      - name: Check channels for new uploads
+        working-directory: scripts
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python check_channels.py
+
+      - name: Download, OCR, and extract results
+        working-directory: scripts
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main.py
+
+      - name: Commit updated results
+        run: |
+          git config user.name "golf-results-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/results.json data/processed.json
+          git diff --cached --quiet || git commit -m "Update results [automated]"
+          git push

@@ -1,0 +1,61 @@
+{
+  "_comment": "Add one entry per YouTube channel to watch. channel_id must start with UC (find it via the channel's page source or a lookup tool). crop is the pixel box around the end-game scoreboard, as a FRACTION of frame width/height (0-1) so it works regardless of video resolution. You'll need to tune this by eyeballing a sample frame per channel -- see README.",
+  "channels": [
+    {
+      "name": "Delux",
+      "channel_id": "UCOwBvtQrGrXzlzq2JaAIqmw",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+    {
+      "name": "Dread",
+      "channel_id": "UCW3E__9XjSlKvmX5PHH7hzg",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+    {
+      "name": "Rohn",
+      "channel_id": "UCFC5MMXpoLq4MTJpli_mXDg",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+    {
+      "name": "Masseo",
+      "channel_id": "UCGWWQRvQoP2te6o15uvwXsg",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+    {
+      "name": "Mollu",
+      "channel_id": "UCOwBvtQrGrXzlzq2JaAIqmw",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+    {
+      "name": "JTaz",
+      "channel_id": "UCRpBCZHwzEdkuCyvbP5AvHg",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+    {
+      "name": "Gabbo",
+      "channel_id": "UCck1Wrv-6h44db16OL4geOQ",
+      "enabled": true,
+      "title_keywords": ["golf", "golfatina"],
+      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
+      "clip_seconds_from_end": 20
+    },
+  ]
+}
