@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   update-results:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14"
+          python-version: "3.11"
 
       - name: Install system dependencies (ffmpeg, tesseract)
         run: |
