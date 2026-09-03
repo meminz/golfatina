@@ -1,0 +1,67 @@
+name: Backfill older videos
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Channel name to backfill (leave blank for all enabled channels)"
+        required: false
+        default: ""
+      since:
+        description: "Only include videos published on/after this date (YYYY-MM-DD, leave blank for all)"
+        required: false
+        default: ""
+      limit:
+        description: "Max videos to pull per channel (leave blank for no limit)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies (ffmpeg, tesseract)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tesseract-ocr
+
+      - name: Install yt-dlp + Python dependencies
+        run: |
+          pip install --upgrade yt-dlp
+          pip install -r requirements.txt
+
+      - name: Queue older videos
+        working-directory: scripts
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.channel }}" ]; then ARGS="$ARGS --channel \"${{ inputs.channel }}\""; fi
+          if [ -n "${{ inputs.since }}" ]; then ARGS="$ARGS --since ${{ inputs.since }}"; fi
+          if [ -n "${{ inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ inputs.limit }}"; fi
+          eval "python backfill.py $ARGS"
+
+      - name: Download, OCR, and extract results
+        working-directory: scripts
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main.py
+
+      - name: Commit updated results
+        run: |
+          git config user.name "golf-results-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/results.json data/processed.json
+          git diff --cached --quiet || git commit -m "Backfill results [automated]"
+          git push
