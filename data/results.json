@@ -1,3 +1,199 @@
 {
-  "results": []
+  "results": [
+    {
+      "video_id": "LMg9XwLmyhs",
+      "channel": "Delux",
+      "title": "C'É UN PO DI GOLFATINA IN QUESTA CENSURA. con Delux, Rohn, Dread & JTaz",
+      "url": "https://www.youtube.com/watch?v=LMg9XwLmyhs",
+      "published_at": "2026-09-01T11:00:23Z",
+      "processed_at": "2026-09-03T21:55:23.140982Z",
+      "map_name": "a A) OF oe 5",
+      "participants": [
+        {
+          "name": "Delux",
+          "score": "93"
+        },
+        {
+          "name": "nonsonodread",
+          "score": "3"
+        },
+        {
+          "name": "JTaz",
+          "score": "46"
+        },
+        {
+          "name": "Just Rohn",
+          "score": "101"
+        }
+      ],
+      "extraction_method": "tesseract"
+    },
+    {
+      "video_id": "9Ht6yvEN_Pg",
+      "channel": "Delux",
+      "title": "LA GOLFATINA DEI G**. [NUOVO STANDARD DI REGOLE] con Delux, Rohn, Dread, Mollu & Cannuccia Bianca",
+      "url": "https://www.youtube.com/watch?v=9Ht6yvEN_Pg",
+      "published_at": "2026-08-19T11:00:31Z",
+      "processed_at": "2026-09-03T21:55:28.134652Z",
+      "map_name": null,
+      "participants": [
+        {
+          "name": ": ick.",
+          "score": "1"
+        },
+        {
+          "name": "\"Be . ae pn ret?",
+          "score": "2"
+        },
+        {
+          "name": "Osher",
+          "score": "1"
+        }
+      ],
+      "extraction_method": "tesseract"
+    },
+    {
+      "video_id": "1mMxDTw_ytQ",
+      "channel": "Dread",
+      "title": "GOLFATINA AI LIMITI DELLA PAZIENZA (Gabbo ha rotto TUTTO) Dread, Rohn, Gabbo, Masseo, Delux, Mollu",
+      "url": "https://www.youtube.com/watch?v=1mMxDTw_ytQ",
+      "published_at": "2026-08-26T13:00:03Z",
+      "processed_at": "2026-09-03T21:55:31.916003Z",
+      "map_name": "VILLAGE ADVENTURE",
+      "participants": [
+        {
+          "name": "Oehix",
+          "score": "39"
+        },
+        {
+          "name": "Just Rohn",
+          "score": "4"
+        },
+        {
+          "name": "lMassoo",
+          "score": "95"
+        },
+        {
+          "name": "honsonodread",
+          "score": "9"
+        },
+        {
+          "name": "Molly",
+          "score": "102"
+        }
+      ],
+      "extraction_method": "tesseract"
+    },
+    {
+      "video_id": "XXTN5QD3PXc",
+      "channel": "Rohn",
+      "title": "LA GOLFATINA NEL MUSEO...PRENDE SUBITO UNA BRUTTA PIEGA...w/ROHN, DREAD, GABBO, DELUX e MOLLU ⛳",
+      "url": "https://www.youtube.com/watch?v=XXTN5QD3PXc",
+      "published_at": "2026-08-21T11:00:27Z",
+      "processed_at": "2026-09-03T21:55:44.434894Z",
+      "map_name": null,
+      "participants": [],
+      "extraction_method": "manual_review_needed"
+    },
+    {
+      "video_id": "K7ObaKsIbM0",
+      "channel": "Rohn",
+      "title": "LA GOLFATINA DELLA VERGOGNA! w/ROHN, DREAD, GABBO, DELUX e MOLLU ⛳",
+      "url": "https://www.youtube.com/watch?v=K7ObaKsIbM0",
+      "published_at": "2026-08-11T11:00:33Z",
+      "processed_at": "2026-09-03T21:55:57.784214Z",
+      "map_name": null,
+      "participants": [],
+      "extraction_method": "manual_review_needed"
+    },
+    {
+      "video_id": "3BTlussfTgQ",
+      "channel": "Rohn",
+      "title": "LA GOLFATINA NELLA CAVERNA...FINISCE IN TRAGEDIA! w/ROHN, DREAD, GABBO, DELUX, MOLLU e IL MASSEO ⛳",
+      "url": "https://www.youtube.com/watch?v=3BTlussfTgQ",
+      "published_at": "2026-07-31T11:00:28Z",
+      "processed_at": "2026-09-03T21:56:11.633893Z",
+      "map_name": null,
+      "participants": [
+        {
+          "name": "nonsonodread",
+          "score": "6"
+        },
+        {
+          "name": "Delux",
+          "score": "7"
+        },
+        {
+          "name": "Just Rohn",
+          "score": "67"
+        },
+        {
+          "name": "iiMasseo",
+          "score": "8"
+        },
+        {
+          "name": "GaBBo",
+          "score": "87"
+        }
+      ],
+      "extraction_method": "tesseract"
+    },
+    {
+      "video_id": "vwu4uBpJpGY",
+      "channel": "Masseo",
+      "title": "GOLFATINA da RIABILITAZIONE con @AroundDread @GaBBoDSQ @oDeluxx @Mollu",
+      "url": "https://www.youtube.com/watch?v=vwu4uBpJpGY",
+      "published_at": "2026-08-31T12:00:39Z",
+      "processed_at": "2026-09-03T21:56:20.844359Z",
+      "map_name": "WACKOLOOY",
+      "participants": [
+        {
+          "name": "honsonodread",
+          "score": "4"
+        },
+        {
+          "name": "GaBBo",
+          "score": "2"
+        },
+        {
+          "name": "Molly",
+          "score": "5"
+        }
+      ],
+      "extraction_method": "tesseract"
+    },
+    {
+      "video_id": "LC3bdmO-AGI",
+      "channel": "JTaz",
+      "title": "LA MIA PRIMISSIMA GOLFATINA con Delux Rohn Gabbo e Jtaz",
+      "url": "https://www.youtube.com/watch?v=LC3bdmO-AGI",
+      "published_at": "2026-08-21T11:00:08Z",
+      "processed_at": "2026-09-03T21:56:39.100902Z",
+      "map_name": null,
+      "participants": [],
+      "extraction_method": "manual_review_needed"
+    },
+    {
+      "video_id": "xC_YNHOFDE4",
+      "channel": "Gabbo",
+      "title": "BENVENUTI ALL'INFERNO: SDROGO GOLFATINA DEMONIACA ( mappa folle )",
+      "url": "https://www.youtube.com/watch?v=xC_YNHOFDE4",
+      "published_at": "2026-08-30T11:00:33Z",
+      "processed_at": "2026-09-03T21:56:49.644081Z",
+      "map_name": null,
+      "participants": [],
+      "extraction_method": "manual_review_needed"
+    },
+    {
+      "video_id": "VydxAl_uxBI",
+      "channel": "Gabbo",
+      "title": "SDROGO GOLFATINA per il mio COMPLEANNO con Dread, Rohn, Delux, JTaz e Mollu",
+      "url": "https://www.youtube.com/watch?v=VydxAl_uxBI",
+      "published_at": "2026-08-18T11:00:34Z",
+      "processed_at": "2026-09-03T21:56:56.268436Z",
+      "map_name": null,
+      "participants": [],
+      "extraction_method": "manual_review_needed"
+    }
+  ]
 }
