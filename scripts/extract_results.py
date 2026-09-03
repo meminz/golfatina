@@ -1,10 +1,12 @@
 """Step 3: turn a candidate end-game frame into structured results.
 
-Primary path: crop to the channel's configured scoreboard region and run
-Tesseract (free, local, no API). If that produces something too sparse to
-be a real scoreboard, and a GEMINI_API_KEY secret is set, fall back to
-Gemini's free-tier vision model for that one frame. If neither works, the
-video is flagged for manual review instead of silently producing junk data.
+Splits the scoreboard into three narrow sub-crops (map name, names column,
+totals column) and OCRs each separately -- OCR-ing the whole multi-column
+table at once causes Tesseract to scramble which number belongs to which
+row/column. If the names/totals row counts don't line up, or a frame
+produces nothing usable, falls back to Gemini's free-tier vision API
+(requires GEMINI_API_KEY) for that one frame. If that's unavailable too,
+the video is flagged manual_review_needed instead of guessing.
 """
 import base64
 import json
@@ -14,13 +16,23 @@ from pathlib import Path
 
 import pytesseract
 import requests
-from PIL import Image
+from PIL import Image, ImageOps
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_MODEL = "gemini-2.0-flash"
 
+# The in-game scoreboard's internal layout is identical across all channels
+# since it's the same game UI -- only scoreboard_crop (where the board sits
+# in each streamer's frame) varies per channel, and lives in channels.json.
+SCOREBOARD_LAYOUT = {
+    "map_name": {"x": 0.28, "y": 0.115, "w": 0.44, "h": 0.05},
+    "names":    {"x": 0.075, "y": 0.335, "w": 0.165, "h": 0.56},
+    "totals":   {"x": 0.885, "y": 0.335, "w": 0.07, "h": 0.56},
+}
+
 
 def crop_to_scoreboard(image_path: Path, crop: dict) -> Image.Image:
+    """Outer crop: isolates the whole scoreboard from the full video frame."""
     img = Image.open(image_path)
     w, h = img.size
     box = (
@@ -32,26 +44,68 @@ def crop_to_scoreboard(image_path: Path, crop: dict) -> Image.Image:
     return img.crop(box)
 
 
-def ocr_tesseract(image: Image.Image) -> str:
-    # Upscaling small crops helps Tesseract a lot with stylized game fonts.
-    if image.width < 1000:
-        scale = 1000 / image.width
-        image = image.resize((int(image.width * scale), int(image.height * scale)))
-    return pytesseract.image_to_string(image)
-
-
-def looks_like_scoreboard(text: str) -> bool:
-    """Very rough sanity check: a real scoreboard capture should have a few
-    lines of non-trivial text. Tune this per-game if you get false positives.
+def crop_subregion(image: Image.Image, region: dict) -> Image.Image:
+    """Inner crop: isolates one column/line out of an already-cropped
+    scoreboard image. `region` fractions are relative to `image`'s own
+    width/height, NOT the full frame.
     """
-    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-    return len(lines) >= 3 and sum(len(ln) for ln in lines) > 20
+    w, h = image.size
+    box = (
+        int(region["x"] * w),
+        int(region["y"] * h),
+        int((region["x"] + region["w"]) * w),
+        int((region["y"] + region["h"]) * h),
+    )
+    return image.crop(box)
+
+
+def _upscale(image: Image.Image, target_w: int = 800) -> Image.Image:
+    if image.width < target_w:
+        scale = target_w / image.width
+        image = image.resize((int(image.width * scale), int(image.height * scale)), Image.LANCZOS)
+    return image
+
+
+def _clean_lines(text: str, min_letters: int = 3) -> list[str]:
+    """Drops empty lines and stray artifacts. Requires a lowercase letter
+    so all-caps junk lines (leftover borders OCR'd as garbage) get filtered
+    out, since real usernames in this UI are mixed/lower case.
+    """
+    lines = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        has_lower = bool(re.search(r"[a-z]", line))
+        letter_count = len(re.findall(r"[A-Za-z]", line))
+        if has_lower and letter_count >= min_letters:
+            lines.append(line)
+    return lines
+
+
+def ocr_map_name(image: Image.Image) -> str:
+    text = pytesseract.image_to_string(_upscale(image), config="--psm 7")
+    return text.strip()
+
+
+def ocr_names(image: Image.Image) -> list[str]:
+    text = pytesseract.image_to_string(_upscale(image), config="--psm 6")
+    return _clean_lines(text)
+
+
+def ocr_totals(image: Image.Image) -> list[str]:
+    """Grayscale + threshold binarization measurably improves digit
+    recognition on bold/stylized game fonts vs raw color input."""
+    gray = ImageOps.grayscale(_upscale(image))
+    bw = gray.point(lambda p: 255 if p > 150 else 0)
+    text = pytesseract.image_to_string(
+        bw, config="--psm 6 -c tessedit_char_whitelist=0123456789"
+    )
+    return [ln.strip() for ln in text.splitlines() if ln.strip()]
 
 
 def ocr_gemini_fallback(image_path: Path) -> dict | None:
-    """Sends the *uncropped* frame to Gemini's free-tier API and asks it to
-    return structured JSON directly. Only used when Tesseract's result looks
-    too sparse to trust. Requires a GEMINI_API_KEY secret; skipped otherwise.
+    """Sends the full (uncropped) frame to Gemini's free-tier API and asks
+    for structured JSON directly. Used when Tesseract's column reads don't
+    line up cleanly. Requires GEMINI_API_KEY; skipped otherwise.
     """
     if not GEMINI_API_KEY:
         return None
@@ -65,6 +119,7 @@ def ocr_gemini_fallback(image_path: Path) -> dict | None:
         "raw JSON (no markdown fences) in this shape: "
         '{"is_scoreboard": true, "map_name": "...", '
         '"participants": [{"name": "...", "score": "..."}]}. '
+        "Use each player's FINAL TOTAL score only, not per-hole scores. "
         'If it is NOT a scoreboard, respond with ONLY {"is_scoreboard": false}.'
     )
 
@@ -98,28 +153,30 @@ def ocr_gemini_fallback(image_path: Path) -> dict | None:
 
 
 def extract_from_frames(frame_paths: list[Path], crop: dict) -> dict:
-    """Tries each candidate frame (usually the last few seconds of the clip,
-    newest first) and returns the first successful structured extraction.
+    """Tries each candidate frame (last frames first), OCRs the three
+    sub-regions using the hardcoded SCOREBOARD_LAYOUT, and returns the first
+    attempt where names/totals line up. Falls back to Gemini per-frame,
+    then to manual_review_needed.
     """
-    for frame_path in reversed(frame_paths):  # last frames first
-        cropped = crop_to_scoreboard(frame_path, crop)
-        raw_text = ocr_tesseract(cropped)
+    for frame_path in reversed(frame_paths):
+        outer = crop_to_scoreboard(frame_path, crop)
 
-        if looks_like_scoreboard(raw_text):
+        map_name = ocr_map_name(crop_subregion(outer, SCOREBOARD_LAYOUT["map_name"])) or None
+        names = ocr_names(crop_subregion(outer, SCOREBOARD_LAYOUT["names"]))
+        totals = ocr_totals(crop_subregion(outer, SCOREBOARD_LAYOUT["totals"]))
+
+        if names and totals and len(names) == len(totals):
             return {
                 "extraction_method": "tesseract",
-                "raw_text": raw_text,
                 "frame": frame_path.name,
-                # Parsing raw_text into map/participants is game-specific --
-                # see parse_scoreboard_text() below for the customization point.
-                **parse_scoreboard_text(raw_text),
+                "map_name": map_name,
+                "participants": [{"name": n, "score": s} for n, s in zip(names, totals)],
             }
 
         gemini_result = ocr_gemini_fallback(frame_path)
         if gemini_result:
             return {
                 "extraction_method": "gemini",
-                "raw_text": raw_text,
                 "frame": frame_path.name,
                 "map_name": gemini_result.get("map_name"),
                 "participants": gemini_result.get("participants", []),
@@ -127,37 +184,7 @@ def extract_from_frames(frame_paths: list[Path], crop: dict) -> dict:
 
     return {
         "extraction_method": "manual_review_needed",
-        "raw_text": None,
         "frame": None,
         "map_name": None,
         "participants": [],
     }
-
-
-def parse_scoreboard_text(raw_text: str) -> dict:
-    """Best-effort, GAME-SPECIFIC parsing of raw OCR text into structured
-    fields. This is the piece you'll want to tune once you see real OCR
-    output from your channels -- current logic is a generic placeholder:
-    - first line containing "map" or similar is treated as the map name
-    - remaining lines matching "Name ... number" are treated as a
-      participant + score pair
-    """
-    lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
-
-    map_name = None
-    participants = []
-
-    score_line = re.compile(r"^(?P<name>[A-Za-z0-9_\-\. ]{2,20}?)\s+(?P<score>-?\d{1,3})$")
-
-    for line in lines:
-        if map_name is None and re.search(r"\bmap\b|\bcourse\b|\bhole\b", line, re.IGNORECASE):
-            map_name = line
-            continue
-
-        match = score_line.match(line)
-        if match:
-            participants.append(
-                {"name": match.group("name").strip(), "score": match.group("score")}
-            )
-
-    return {"map_name": map_name, "participants": participants}

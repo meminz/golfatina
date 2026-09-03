@@ -1,4 +1,5 @@
 test/
+debug*
 new_videos.json
 __pycache__/
 *.pyc

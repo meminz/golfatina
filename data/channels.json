@@ -6,56 +6,56 @@
       "channel_id": "UCOwBvtQrGrXzlzq2JaAIqmw",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
     },
     {
       "name": "Dread",
       "channel_id": "UCW3E__9XjSlKvmX5PHH7hzg",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
     },
     {
       "name": "Rohn",
       "channel_id": "UCFC5MMXpoLq4MTJpli_mXDg",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
     },
     {
       "name": "Masseo",
       "channel_id": "UCGWWQRvQoP2te6o15uvwXsg",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
     },
     {
       "name": "Mollu",
       "channel_id": "UCOwBvtQrGrXzlzq2JaAIqmw",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
     },
     {
       "name": "JTaz",
       "channel_id": "UCRpBCZHwzEdkuCyvbP5AvHg",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
     },
     {
       "name": "Gabbo",
       "channel_id": "UCck1Wrv-6h44db16OL4geOQ",
       "enabled": true,
       "title_keywords": ["golf", "golfatina"],
-      "scoreboard_crop": { "x": 0.15, "y": 0.10, "w": 0.70, "h": 0.55 },
-      "clip_seconds_from_end": 20
-    },
+      "scoreboard_crop": { "x": 0.11, "y": 0.26, "w": 0.48, "h": 0.74 },
+      "clip_window": {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
+    }
   ]
 }

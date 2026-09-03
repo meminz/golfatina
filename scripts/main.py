@@ -35,7 +35,10 @@ def main():
         print(f"Processing {video_id} -- {video['title']}")
 
         try:
-            clip_path = download_tail_clip(video_id, video["clip_seconds_from_end"])
+            window = video["clip_window"]
+            clip_path = download_tail_clip(
+                video_id, window["start_seconds_from_end"], window["end_seconds_from_end"]
+            )
             frames = extract_frames(clip_path, fps=1.0)
             if not frames:
                 raise RuntimeError("no frames extracted")

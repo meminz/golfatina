@@ -47,7 +47,9 @@ def main():
 
             video["channel_name"] = channel["name"]
             video["scoreboard_crop"] = channel["scoreboard_crop"]
-            video["clip_seconds_from_end"] = channel.get("clip_seconds_from_end", 25)
+            video["clip_window"] = channel.get(
+                "clip_window", {"start_seconds_from_end": 27, "end_seconds_from_end": 20}
+            )
             video["url"] = f"https://www.youtube.com/watch?v={video['video_id']}"
             new_videos.append(video)
 

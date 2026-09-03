@@ -34,6 +34,70 @@ def uploads_playlist_id(channel_id: str) -> str:
     return "UU" + channel_id[2:]
 
 
+def fetch_all_uploads(channel_id: str, since=None, max_videos=None):
+    """Paginates through a channel's ENTIRE uploads playlist (oldest videos
+    require walking through pageToken pages -- the API has no 'jump to date'
+    option). Use for backfilling; for the daily check, fetch_recent_uploads
+    is cheaper since it only looks at the first page.
+
+    since: an ISO date string (e.g. "2024-01-01") -- stop once we hit videos
+           published before this date (uploads playlist is newest-first).
+    max_videos: stop after collecting this many videos, regardless of date.
+    """
+    if not YOUTUBE_API_KEY:
+        raise RuntimeError("YOUTUBE_API_KEY environment variable is not set")
+
+    playlist_id = uploads_playlist_id(channel_id)
+    videos = []
+    page_token = None
+
+    while True:
+        params = {
+            "part": "snippet,contentDetails",
+            "playlistId": playlist_id,
+            "maxResults": 50,  # API max per page
+            "key": YOUTUBE_API_KEY,
+        }
+        if page_token:
+            params["pageToken"] = page_token
+
+        resp = requests.get(
+            "https://www.googleapis.com/youtube/v3/playlistItems",
+            params=params,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        payload = resp.json()
+
+        stop = False
+        for item in payload.get("items", []):
+            snippet = item["snippet"]
+            published_at = snippet["publishedAt"]
+
+            if since and published_at < since:
+                stop = True
+                break
+
+            videos.append(
+                {
+                    "video_id": item["contentDetails"]["videoId"],
+                    "title": snippet["title"],
+                    "published_at": published_at,
+                    "channel_title": snippet["channelTitle"],
+                }
+            )
+
+            if max_videos and len(videos) >= max_videos:
+                stop = True
+                break
+
+        page_token = payload.get("nextPageToken")
+        if stop or not page_token:
+            break
+
+    return videos
+
+
 def fetch_recent_uploads(channel_id: str, max_results: int = 10):
     """Return the most recent videos for a channel via playlistItems.list.
     Cheaper on quota than search.list (1 unit vs 100 units per call).
