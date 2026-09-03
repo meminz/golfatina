@@ -37,10 +37,14 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: python check_channels.py
 
+      - name: Write YouTube cookies
+        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
+
       - name: Download, OCR, and extract results
         working-directory: scripts
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YTDLP_COOKIES_FILE: ${{ github.workspace }}/cookies.txt
         run: python main.py
 
       - name: Commit updated results

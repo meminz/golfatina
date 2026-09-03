@@ -1,12 +1,17 @@
-"""Step 2: for one video, grab only the last N seconds and split it into
-candidate frames. Downloading just the tail (via yt-dlp's download-sections)
-keeps this fast and avoids pulling entire videos just to look at the very end.
-"""
+"""Downloads the tail end of a video and extracts candidate frames."""
+import os
 import shutil
 import subprocess
 from pathlib import Path
 
 WORK_DIR = Path(__file__).resolve().parent.parent / "work"
+COOKIES_FILE = os.environ.get("YTDLP_COOKIES_FILE")
+
+
+def _cookie_args():
+    if COOKIES_FILE and Path(COOKIES_FILE).exists():
+        return ["--cookies", COOKIES_FILE]
+    return []
 
 
 def _run(cmd):
@@ -17,72 +22,68 @@ def _run(cmd):
 
 
 def download_tail_clip(video_id: str, start_seconds_from_end: int, end_seconds_from_end: int) -> Path:
-    """Downloads only a WINDOW near the end of the video -- from
-    `start_seconds_from_end` seconds before the end, to `end_seconds_from_end`
-    seconds before the end (e.g. 27 -> 20 means "the 7 seconds starting 27s
-    before the end"). This is narrower than grabbing the whole tail, so it's
-    faster and produces fewer frames to OCR.
-
-    Tries yt-dlp's two-sided negative section syntax first (downloads only
-    the window itself). If that fails for any reason -- section syntax can
-    be finicky across yt-dlp versions -- falls back to downloading the wider
-    tail (from start_seconds_from_end to the very end) and trimming to the
-    exact window locally with ffmpeg, which is slower but bulletproof.
+    """Downloads only a WINDOW near the end of the video -- video-only (no
+    audio track needed, we only extract still frames). Tries yt-dlp's
+    two-sided negative section syntax first; falls back to downloading the
+    wider tail and trimming locally with ffmpeg if that fails.
     """
     if end_seconds_from_end >= start_seconds_from_end:
-        raise ValueError(
-            "end_seconds_from_end must be smaller than start_seconds_from_end "
-            "(the window's 'end' offset is closer to the end of the video)"
-        )
+        raise ValueError("end_seconds_from_end must be smaller than start_seconds_from_end")
 
     video_dir = WORK_DIR / video_id
     video_dir.mkdir(parents=True, exist_ok=True)
-    out_path = video_dir / "clip.mp4"
     url = f"https://www.youtube.com/watch?v={video_id}"
 
-    # yt-dlp section syntax: "*START-END". A "-" prefix on either side makes
-    # that offset relative to the end of the video, e.g. "*-27--20" means
-    # "from 27s before the end, to 20s before the end".
+    video_format = (
+        "bestvideo[height<=1080][ext=mp4]/"
+        "bestvideo[height<=1080]/"
+        "best[height<=1080]"
+    )
     window_section = f"*-{start_seconds_from_end}--{end_seconds_from_end}"
+    out_template = str(video_dir / "clip.%(ext)s")
+
+    def _find_clip() -> Path:
+        matches = list(video_dir.glob("clip.*"))
+        if not matches:
+            raise RuntimeError("yt-dlp reported success but no clip file was found")
+        return matches[0]
 
     try:
         _run(
             [
                 "yt-dlp",
+                *_cookie_args(),
                 "--download-sections", window_section,
-                "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
-                "--merge-output-format",
-                "mp4",
-                "-o", str(out_path),
+                "-f", video_format,
+                "-o", out_template,
                 "--force-keyframes-at-cuts",
                 "--quiet",
                 "--no-warnings",
                 url,
             ]
         )
-        return out_path
+        return _find_clip()
     except RuntimeError as exc:
         print(f"[warn] windowed download failed ({exc}); falling back to tail download + ffmpeg trim")
 
-    # Fallback: download the wider tail, then trim to the exact window.
-    wide_path = video_dir / "clip_wide.mp4"
     tail_section = f"*-{start_seconds_from_end}-0"
     _run(
         [
             "yt-dlp",
+            *_cookie_args(),
             "--download-sections", tail_section,
-            "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
-            "--merge-output-format",
-            "mp4",
-            "-o", str(wide_path),
+            "-f", video_format,
+            "-o", out_template,
             "--force-keyframes-at-cuts",
             "--quiet",
             "--no-warnings",
             url,
         ]
     )
-
+    wide_path = _find_clip()
+    trimmed_path = video_dir / f"trimmed{wide_path.suffix}"
     window_duration = start_seconds_from_end - end_seconds_from_end
+
     _run(
         [
             "ffmpeg",
@@ -91,12 +92,12 @@ def download_tail_clip(video_id: str, start_seconds_from_end: int, end_seconds_f
             "-ss", "0",
             "-t", str(window_duration),
             "-c", "copy",
-            str(out_path),
+            str(trimmed_path),
             "-loglevel", "error",
         ]
     )
     wide_path.unlink(missing_ok=True)
-    return out_path
+    return trimmed_path
 
 
 def extract_frames(clip_path: Path, fps: float = 1.0) -> list[Path]:
